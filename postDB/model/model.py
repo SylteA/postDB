@@ -1,8 +1,6 @@
 from postDB.model.meta import ModelMeta
 
 from asyncpg.connection import Connection
-from asyncpg import UniqueViolationError
-from typing import List
 
 
 def format_missing(missing):
@@ -15,12 +13,12 @@ def format_missing(missing):
     if len(missing) == 2:
         return " and ".join(fmt_single(col.name) for col in missing)
 
-    return ", ".join(fmt_single(col.name) for col in missing[:-1]) \
-           + " and %s" % fmt_single(missing[-1].name)
+    return ", ".join(
+        fmt_single(col.name) for col in missing[:-1]
+    ) + " and %s" % fmt_single(missing[-1].name)
 
 
 class Model(metaclass=ModelMeta):
-
     def __init__(self, **attrs):
         missing = self.columns.copy()
 
@@ -37,9 +35,11 @@ class Model(metaclass=ModelMeta):
             missing.remove(col)
 
         if missing:
-            raise TypeError("__init__() missing {0} required positional arguments: {1}".format(
-                len(missing), format_missing(missing)
-            ))
+            raise TypeError(
+                "__init__() missing {0} required positional arguments: {1}".format(
+                    len(missing), format_missing(missing)
+                )
+            )
 
     @classmethod
     def create_table_sql(cls, *, exists_ok: bool = True):
@@ -57,8 +57,9 @@ class Model(metaclass=ModelMeta):
 
         for col in cls.columns:
             columns.append(
-                col.generate_create_table_sql()
-                + "," if col != cls.columns[-1] or any(pks) else ""
+                col.generate_create_table_sql() + ","
+                if col != cls.columns[-1] or any(pks)
+                else ""
             )
 
         if pks:
@@ -68,7 +69,7 @@ class Model(metaclass=ModelMeta):
         statements.append(" ".join(builder) + ";")
 
         if any(col.index for col in cls.columns):
-            statements.append('')
+            statements.append("")
 
         for col in cls.columns:
             if col.index:
@@ -89,3 +90,24 @@ class Model(metaclass=ModelMeta):
         builder.append("%s CASCADE;" % cls.__tablename__)
         return " ".join(builder)
 
+    async def create(
+        self, con: Connection, *, verbose: bool = False, exists_ok: bool = True
+    ):
+        """Create the PostgreSQL Table for this Model."""
+        sql = self.create_table_sql(exists_ok=exists_ok)
+
+        if verbose:
+            print(sql)
+
+        return await con.execute(sql)
+
+    async def drop(
+        self, con: Connection, *, verbose: bool = False, exists_ok: bool = True
+    ):
+        """Drop the PostgreSQL Table for this Model."""
+        sql = self.drop_table_sql(exists_ok=exists_ok)
+
+        if verbose:
+            print(sql)
+
+        return await con.execute(sql)

@@ -19,8 +19,7 @@ class ModelMeta(type):
                     col.name = key
 
                 if col.index:
-                    col.index_name = "%s_%s_idx" \
-                        % (tablename, col.name)
+                    col.index_name = "%s_%s_idx" % (tablename, col.name)
 
                 columns.append(col)
 

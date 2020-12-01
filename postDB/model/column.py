@@ -41,7 +41,9 @@ class Column:
                     try:
                         default = column_type.python(default)
                     except TypeError:
-                        raise TypeError("Column default cannot be of different type than column_type")
+                        raise TypeError(
+                            "Column default cannot be of different type than column_type"
+                        )
 
         self.column_type = column_type
         self.index = index

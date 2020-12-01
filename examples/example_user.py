@@ -7,5 +7,5 @@ class User(Model):
     email = Column(types.String, unique=True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print(User.create_table_sql())
