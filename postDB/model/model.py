@@ -90,7 +90,7 @@ class Model(metaclass=ModelMeta):
         builder.append("%s CASCADE;" % cls.__tablename__)
         return " ".join(builder)
 
-    async def create(
+    async def create_table(
         self, con: Connection, *, verbose: bool = False, exists_ok: bool = True
     ):
         """Create the PostgreSQL Table for this Model."""
@@ -101,7 +101,7 @@ class Model(metaclass=ModelMeta):
 
         return await con.execute(sql)
 
-    async def drop(
+    async def drop_table(
         self, con: Connection, *, verbose: bool = False, exists_ok: bool = True
     ):
         """Drop the PostgreSQL Table for this Model."""
