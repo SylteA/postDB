@@ -59,35 +59,6 @@ class Column:
                 "'unique', 'primary_key', and 'default' are mutually exclusive."
             )
 
-    @classmethod
-    def from_dict(cls, data: dict) -> "Column":
-        index_name = data.pop("index_name", None)
-        column_type = data.pop("column_type")
-        column_type = SQLType.from_dict(column_type)
-        self = cls(column_type=column_type, **data)
-        self.index_name = index_name
-        return self
-
-    def to_dict(self) -> dict:
-        d = {attr: getattr(self, attr) for attr in self.__slots__}
-        d["column_type"] = self.column_type.to_dict()
-        return d
-
-    @property
-    def _comparable_id(self) -> str:
-        return "-".join(
-            "%s:%s" % (attr, getattr(self, attr)) for attr in self.__slots__
-        )
-
-    def _qualifiers_dict(self):
-        return {attr: getattr(self, attr) for attr in ("nullable", "default")}
-
-    def _is_rename(self, other):
-        if self.name == other.name:
-            return False
-
-        return self.unique == other.unique and self.primary_key == other.primary_key
-
     def generate_create_table_sql(self):
         builder = [self.name, self.column_type.to_sql()]
 

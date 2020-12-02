@@ -1,5 +1,5 @@
 # postDB
-<img src="postDB.png" alt="" width="100px" align="right">
+<img src="postDB.png" alt="" width="200px" align="right">
 A WIP asynchronous database module for PostgreSQL databases.
 
 ### Need help?
@@ -19,3 +19,5 @@ class User(Model):
 if __name__ == '__main__':
     print(User.create_table_sql())
 ```
+
+###### Find more examples **[HERE!](./examples)**

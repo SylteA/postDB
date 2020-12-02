@@ -1,3 +1,7 @@
+"""
+Test creating a Model and generating the SQL to create its table.
+"""
+
 from postDB import Model, Column, types
 
 
