@@ -1,4 +1,5 @@
 # postDB
+<img src="postDB.png" alt="" width="100px" align="right">
 A WIP asynchronous database module for PostgreSQL databases.
 
 ### Need help?
