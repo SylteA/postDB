@@ -1,5 +1,6 @@
-from setuptools import setup
 import sys
+
+import setuptools
 
 CURRENT_VERSION = sys.version_info[:2]
 REQUIRED_VERSION = (3, 6)
@@ -26,4 +27,6 @@ version of Python.
     )
     sys.exit(1)
 
-setup()
+setuptools.setup(
+    packages=setuptools.find_packages()
+)
