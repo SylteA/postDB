@@ -10,7 +10,7 @@ class ModelMeta(type):
             # Only occurs on direct subclasses of ModelMeta.
             return super().__new__(mcs, name, parents, data)
 
-        tablename = kwargs.get("tablename", mcs.__name__.lower() + "s")
+        tablename = kwargs.get("tablename", name.lower() + "s")
 
         columns = []
         for key, col in data.items():

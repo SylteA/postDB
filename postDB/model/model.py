@@ -1,6 +1,12 @@
 from postDB.model.meta import ModelMeta
+from postDB.types import Serial
 
 from asyncpg.connection import Connection
+from asyncpg import create_pool
+from asyncpg.pool import Pool
+
+from typing import Optional
+import json
 
 
 def format_missing(missing):
@@ -19,20 +25,26 @@ def format_missing(missing):
 
 
 class Model(metaclass=ModelMeta):
-    def __init__(self, **attrs):
-        missing = self.columns.copy()
+    pool: Optional[Pool] = None
 
-        for col in missing:
+    def __init__(self, **attrs):
+        missing = []
+
+        for col in self.columns:
             try:
                 val = attrs[col.name]
             except KeyError:
-                if col.default is None and not col.nullable:
+                if (
+                    col.default is None
+                    and not col.nullable
+                    and not isinstance(col.column_type, Serial)
+                ):
+                    missing.append(col)
                     continue
 
                 val = col.default
 
             setattr(self, col.name, val)
-            missing.remove(col)
 
         if missing:
             raise TypeError(
@@ -65,7 +77,7 @@ class Model(metaclass=ModelMeta):
         if pks:
             columns.append("PRIMARY KEY (%s)" % ", ".join(pks))
 
-        builder.append("(\n    %s)" % "\n    ".join(columns))
+        builder.append("(\n    %s\n)" % "\n    ".join(columns))
         statements.append(" ".join(builder) + ";")
 
         if any(col.index for col in cls.columns):
@@ -90,22 +102,77 @@ class Model(metaclass=ModelMeta):
         builder.append("%s CASCADE;" % cls.__tablename__)
         return " ".join(builder)
 
-    async def create(
-        self, con: Connection, *, verbose: bool = False, exists_ok: bool = True
+    @classmethod
+    async def create_pool(
+        cls,
+        uri: str,
+        *,
+        min_con: int = 1,
+        max_con: int = 10,
+        timeout: float = 10.0,
+        **pool_kwargs,
+    ) -> None:
+        """Populate the internal pool keyword."""
+
+        if isinstance(cls.pool, Pool):
+            await cls.pool.close()
+
+        async def init(con: Connection) -> None:
+            await con.set_type_codec(
+                "json", schema="pg_catalog", encoder=json.dumps, decoder=json.loads
+            )
+
+        cls.pool = await create_pool(
+            dsn=uri,
+            init=init,
+            timeout=timeout,
+            min_size=min_con,
+            max_size=max_con,
+            **pool_kwargs,
+        )
+
+    @classmethod
+    async def ensure_con(cls, con: Optional[Connection] = None) -> Connection:
+        if isinstance(con, Connection):
+            return con
+
+        if isinstance(cls.pool, Pool):
+            return await cls.pool.acquire()
+
+        raise RuntimeWarning(
+            f"Unable to get Connection, either call `Model.create_pool` or provide a `con` arg."
+        )
+
+    @classmethod
+    async def create_table(
+        cls,
+        con: Optional[Connection] = None,
+        *,
+        verbose: bool = False,
+        exists_ok: bool = True,
     ):
         """Create the PostgreSQL Table for this Model."""
-        sql = self.create_table_sql(exists_ok=exists_ok)
+        con = await cls.ensure_con(con=con)
+
+        sql = cls.create_table_sql(exists_ok=exists_ok)
 
         if verbose:
             print(sql)
 
         return await con.execute(sql)
 
-    async def drop(
-        self, con: Connection, *, verbose: bool = False, exists_ok: bool = True
+    @classmethod
+    async def drop_table(
+        cls,
+        con: Optional[Connection] = None,
+        *,
+        verbose: bool = False,
+        exists_ok: bool = True,
     ):
         """Drop the PostgreSQL Table for this Model."""
-        sql = self.drop_table_sql(exists_ok=exists_ok)
+        con = await cls.ensure_con(con=con)
+
+        sql = cls.drop_table_sql(exists_ok=exists_ok)
 
         if verbose:
             print(sql)
