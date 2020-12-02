@@ -1,5 +1,5 @@
 # postDB
-<img src="postDB.png" alt="" width="200px" align="right">
+<img src="postDB.png" alt="" width="175px" align="right">
 A WIP asynchronous database module for PostgreSQL databases.
 
 ### Need help?
