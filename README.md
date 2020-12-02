@@ -18,3 +18,5 @@ class User(Model):
 if __name__ == '__main__':
     print(User.create_table_sql())
 ```
+
+###### Find more examples **[HERE!](./examples)**
