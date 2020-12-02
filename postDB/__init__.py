@@ -1,4 +1,4 @@
-__version__ = "0.0.2a"
+__version__ = "0.0.3a"
 __author__ = "Sylte"
 __licence__ = "MIT"
 __copyright__ = "Copyright (c) 2020 Sylte"
@@ -7,8 +7,8 @@ __title__ = "postDB"
 import logging
 from collections import namedtuple
 
-from .model.column import Column
-from .model.model import Model
+from postDB.model.column import Column
+from postDB.model.model import Model
 
 VersionInfo = namedtuple("VersionInfo", "major minor micro releaselevel serial")
 
@@ -18,7 +18,7 @@ def get_version(version: tuple):
     return "%s %s.%s.%s" % (version[3], version[0], version[1], version[2])
 
 
-VERSION = (0, 0, 2, "alpha", 0)
+VERSION = (0, 0, 3, "alpha", 0)
 version_info = VersionInfo(*VERSION)
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
