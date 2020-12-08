@@ -1,12 +1,12 @@
-from postDB.model.meta import ModelMeta
-from postDB.types import Serial
+import json
+from typing import Optional, List
 
-from asyncpg.connection import Connection
 from asyncpg import create_pool
+from asyncpg.connection import Connection
 from asyncpg.pool import Pool
 
-from typing import Optional, List
-import json
+from postDB.model.meta import ModelMeta
+from postDB.types import Serial
 
 
 def format_missing(missing):
@@ -69,9 +69,9 @@ class Model(metaclass=ModelMeta):
 
         for col in cls.columns:
             columns.append(
-                col.generate_create_table_sql() + ","
+                col.generate_create_table_sql() + (","
                 if col != cls.columns[-1] or any(pks)
-                else ""
+                else "")
             )
 
         if pks:
