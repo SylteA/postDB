@@ -5,7 +5,7 @@ from asyncpg.connection import Connection
 from asyncpg import create_pool
 from asyncpg.pool import Pool
 
-from typing import Optional
+from typing import Optional, List
 import json
 
 
@@ -178,3 +178,7 @@ class Model(metaclass=ModelMeta):
             print(sql)
 
         return await con.execute(sql)
+
+    @classmethod
+    def all_models(cls) -> List["Model"]:
+        return cls.__subclasses__()
