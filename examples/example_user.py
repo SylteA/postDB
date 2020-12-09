@@ -13,3 +13,8 @@ class User(Model):
 
 if __name__ == "__main__":
     print(User.create_table_sql())
+
+    user = User(id=5, username="frank", email="frank@doesnotexist")
+
+    print(user.as_dict())
+    print(user.as_dict("id", "username"))

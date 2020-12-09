@@ -27,6 +27,4 @@ version of Python.
     )
     sys.exit(1)
 
-setuptools.setup(
-    packages=setuptools.find_packages()
-)
+setuptools.setup(packages=setuptools.find_packages())

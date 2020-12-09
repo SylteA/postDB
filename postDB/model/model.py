@@ -69,9 +69,8 @@ class Model(metaclass=ModelMeta):
 
         for col in cls.columns:
             columns.append(
-                col.generate_create_table_sql() + (","
-                if col != cls.columns[-1] or any(pks)
-                else "")
+                col.generate_create_table_sql()
+                + ("," if col != cls.columns[-1] or any(pks) else "")
             )
 
         if pks:
@@ -181,4 +180,20 @@ class Model(metaclass=ModelMeta):
 
     @classmethod
     def all_models(cls) -> List["Model"]:
+        """Returns a list of all `Model` subclasses."""
         return cls.__subclasses__()
+
+    def as_dict(self, *columns) -> dict:
+        """Returns a dict of attribute:value, only containing the columns specified."""
+        all_column_names = [col.name for col in self.columns]
+        if not columns:
+            columns = all_column_names
+        else:
+            for col in columns:
+                if col not in all_column_names:
+                    raise ValueError(
+                        "%s is not a attribute of the %s Model."
+                        % (col, type(self).__name__)
+                    )
+
+        return {key: getattr(self, key, None) for key in columns}
