@@ -1,4 +1,5 @@
 import json
+from asyncio import BaseEventLoop
 from typing import Optional, List
 
 from asyncpg import create_pool
@@ -109,6 +110,7 @@ class Model(metaclass=ModelMeta):
         min_con: int = 1,
         max_con: int = 10,
         timeout: float = 10.0,
+        loop: BaseEventLoop = None,
         **pool_kwargs,
     ) -> None:
         """Populate the internal pool keyword."""
@@ -124,6 +126,7 @@ class Model(metaclass=ModelMeta):
         cls.pool = await create_pool(
             dsn=uri,
             init=init,
+            loop=loop,
             timeout=timeout,
             min_size=min_con,
             max_size=max_con,
