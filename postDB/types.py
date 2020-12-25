@@ -9,6 +9,7 @@ from postDB.exceptions import SchemaError
 
 class SQLType:
     """Base class for all the other types"""
+
     python = None
 
     def to_dict(self):
@@ -46,6 +47,7 @@ class SQLType:
 
 class Binary(SQLType):
     """Type for python :class:`bytes`. ``BYTEA`` in PostgreSQL."""
+
     python = bytes
 
     def to_sql(self):
@@ -54,6 +56,7 @@ class Binary(SQLType):
 
 class Boolean(SQLType):
     """Type for python :class:`bool`. ``BOOLEAN`` in PostgreSQL."""
+
     python = bool
 
     def to_sql(self):
@@ -62,6 +65,7 @@ class Boolean(SQLType):
 
 class Date(SQLType):
     """Type for python :class:`datetime.date`. ``DATE`` in PostgreSQL."""
+
     python = datetime.date
 
     def to_sql(self):
@@ -70,9 +74,9 @@ class Date(SQLType):
 
 class DateTime(SQLType):
     """Type for python :class:`datetime.datetime`. ``TIMESTAMP WITH TIME ZONE``
-    or ``TIMESTAMP WITHOUT TIME ZONE``in PostgreSQL.
+    or ``TIMESTAMP WITHOUT TIME ZONE`` in PostgreSQL.
 
-    Optional timezone with the :attr:`timezone` attribute"""
+    Optional timezone with the :attr:`timezone` attribute."""
 
     python = datetime.datetime
 
@@ -87,6 +91,7 @@ class DateTime(SQLType):
 
 class Real(SQLType):
     """Type for python :class:`float`. ``REAL`` in PostgreSQL."""
+
     python = float
 
     def to_sql(self):
@@ -95,6 +100,7 @@ class Real(SQLType):
 
 class Float(SQLType):
     """Type for python :class:`float`. ``FLOAT`` in PostgreSQL."""
+
     python = float
 
     def to_sql(self):
@@ -145,24 +151,25 @@ class Interval(SQLType):
 
     Optional field argument for setting the interval type with the :attr:`field`.
     field argument needs to be in this list:
-    - "YEAR"
-    - "MONTH"
-    - "DAY"
-    - "HOUR"
-    - "MINUTE"
-    - "SECOND"
-    - "YEAR TO MONTH"
-    - "DAY TO HOUR"
-    - "DAY TO MINUTE"
-    - "DAY TO SECOND"
-    - "HOUR TO MINUTE"
-    - "HOUR TO SECOND"
-    - "MINUTE TO SECOND"
+
+    - ``"YEAR"``
+    - ``"MONTH"``
+    - ``"DAY"``
+    - ``"HOUR"``
+    - ``"MINUTE"``
+    - ``"SECOND"``
+    - ``"YEAR TO MONTH"``
+    - ``"DAY TO HOUR"``
+    - ``"DAY TO MINUTE"``
+    - ``"DAY TO SECOND"``
+    - ``"HOUR TO MINUTE"``
+    - ``"HOUR TO SECOND"``
+    - ``"MINUTE TO SECOND"``
     """
 
     python = datetime.timedelta
 
-    def __init__(self, field=None):
+    def __init__(self, field: str = None):
         if field:
             field = field.upper()
             if field not in (
@@ -192,9 +199,14 @@ class Interval(SQLType):
 
 
 class Numeric(SQLType):
+    """Type for python :class:`decimal.Decimal`. ``NUMERIC``
+    or ``NUMERIC({precision}, {scale})`` in PostgreSQL.
+
+    Optional precision and scale with :attr:`precision` and :attr:`scale`"""
+
     python = decimal.Decimal
 
-    def __init__(self, *, precision=None, scale=None):
+    def __init__(self, *, precision: int = None, scale: int = None):
         if precision is not None:
             if precision < 0 or precision > 1000:
                 raise SchemaError("precision must be greater than 0 and below 1000")
@@ -211,9 +223,14 @@ class Numeric(SQLType):
 
 
 class String(SQLType):
+    """Type for python :class:`str`. ``TEXT``
+    or ``CHAR({length})`` or ``VARCHAR({length})`` in PostgreSQL.
+
+    Optional length and fixed with :attr:`length` and :attr:`fixed`"""
+
     python = str
 
-    def __init__(self, *, length=None, fixed=False):
+    def __init__(self, *, length: int = None, fixed=False):
         if fixed and length is None:
             raise SchemaError("Cannot have fixed string with no length")
 
@@ -231,6 +248,11 @@ class String(SQLType):
 
 
 class Time(SQLType):
+    """Type for python :class:`datetime.time`. ``TIME WITH TIME ZONE``
+    or ``TIME WITHOUT TIME ZONE`` in PostgreSQL.
+
+    Optional timezone with the :attr:`timezone` attribute."""
+
     python = datetime.time
 
     def __init__(self, *, timezone=False):
@@ -243,6 +265,8 @@ class Time(SQLType):
 
 
 class JSON(SQLType):
+    """Type for python :class:`dict`. ``JSON`` in PostgreSQL."""
+
     python = dict
 
     def to_sql(self):
@@ -310,6 +334,8 @@ class ForeignKey(SQLType):
 
 
 class Array(SQLType):
+    """Type for python :class:`list`. ``{type} ARRAY`` in PostgreSQL."""
+
     python = list
 
     def __init__(self, sql_type):
