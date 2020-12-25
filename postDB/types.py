@@ -8,6 +8,7 @@ from postDB.exceptions import SchemaError
 
 
 class SQLType:
+    """Base class for all the other types"""
     python = None
 
     def to_dict(self):
@@ -36,6 +37,7 @@ class SQLType:
         return not self.__eq__(other)
 
     def to_sql(self):
+        """Return the SQL of the type"""
         raise NotImplementedError()
 
     def is_real_type(self):
@@ -43,6 +45,7 @@ class SQLType:
 
 
 class Binary(SQLType):
+    """Type for python :class:`bytes`. ``BYTEA`` in PostgreSQL."""
     python = bytes
 
     def to_sql(self):
@@ -50,6 +53,7 @@ class Binary(SQLType):
 
 
 class Boolean(SQLType):
+    """Type for python :class:`bool`. ``BOOLEAN`` in PostgreSQL."""
     python = bool
 
     def to_sql(self):
@@ -57,6 +61,7 @@ class Boolean(SQLType):
 
 
 class Date(SQLType):
+    """Type for python :class:`datetime.date`. ``DATE`` in PostgreSQL."""
     python = datetime.date
 
     def to_sql(self):
@@ -64,6 +69,11 @@ class Date(SQLType):
 
 
 class DateTime(SQLType):
+    """Type for python :class:`datetime.datetime`. ``TIMESTAMP WITH TIME ZONE``
+    or ``TIMESTAMP WITHOUT TIME ZONE``in PostgreSQL.
+
+    Optional timezone with the :attr:`timezone` attribute"""
+
     python = datetime.datetime
 
     def __init__(self, *, timezone=False):
@@ -76,6 +86,7 @@ class DateTime(SQLType):
 
 
 class Real(SQLType):
+    """Type for python :class:`float`. ``REAL`` in PostgreSQL."""
     python = float
 
     def to_sql(self):
@@ -83,6 +94,7 @@ class Real(SQLType):
 
 
 class Float(SQLType):
+    """Type for python :class:`float`. ``FLOAT`` in PostgreSQL."""
     python = float
 
     def to_sql(self):
@@ -90,6 +102,11 @@ class Float(SQLType):
 
 
 class Integer(SQLType):
+    """Type for python :class:`int`. ``INTEGER``
+    or ``BIG INT`` or ``SMALL INT`` in PostgreSQL.
+
+    Optional big or small integer with :attr:`big` and :attr:`small`"""
+
     python = int
 
     def __init__(self, *, big=False, small=False):
@@ -107,6 +124,11 @@ class Integer(SQLType):
 
 
 class Serial(Integer):
+    """Type for python :class:`int` that autoincrements. ``SERIAL``
+    or ``BIG SERIAL`` or ``SMALL SERIAL`` in PostgreSQL.
+
+    Optional big or small integer with :attr:`big` and :attr:`small`"""
+
     def to_sql(self):
         if self.big or self.small:
             return ("BIG" if self.big else "SMALL") + "SERIAL"
@@ -118,6 +140,26 @@ class Serial(Integer):
 
 
 class Interval(SQLType):
+    """Type for python :class:`datetime.timedelta`. ``INTERVAL``
+    or ``INTERVAL {field}`` in PostgreSQL.
+
+    Optional field argument for setting the interval type with the :attr:`field`.
+    field argument needs to be in this list:
+    - "YEAR"
+    - "MONTH"
+    - "DAY"
+    - "HOUR"
+    - "MINUTE"
+    - "SECOND"
+    - "YEAR TO MONTH"
+    - "DAY TO HOUR"
+    - "DAY TO MINUTE"
+    - "DAY TO SECOND"
+    - "HOUR TO MINUTE"
+    - "HOUR TO SECOND"
+    - "MINUTE TO SECOND"
+    """
+
     python = datetime.timedelta
 
     def __init__(self, field=None):
@@ -138,7 +180,7 @@ class Interval(SQLType):
                 "HOUR TO SECOND",
                 "MINUTE TO SECOND",
             ):
-                raise SchemaError("invalid interval specified")
+                raise SchemaError("Invalid interval specified")
             self.field = field
         else:
             self.field = None

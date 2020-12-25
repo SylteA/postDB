@@ -26,6 +26,7 @@ def format_missing(missing):
 
 
 class Model(metaclass=ModelMeta):
+    """Base class for all the models."""
     pool: Optional[Pool] = None
 
     def __init__(self, **attrs):
@@ -55,7 +56,7 @@ class Model(metaclass=ModelMeta):
             )
 
     @classmethod
-    def create_table_sql(cls, *, exists_ok: bool = True):
+    def create_table_sql(cls, *, exists_ok: bool = True) -> str:
         """Generates the CREATE TABLE statement."""
         statements = []
         builder = ["CREATE TABLE"]
@@ -93,7 +94,7 @@ class Model(metaclass=ModelMeta):
         return "\n".join(statements)
 
     @classmethod
-    def drop_table_sql(cls, exists_ok: bool = True):
+    def drop_table_sql(cls, exists_ok: bool = True) -> str:
         builder = ["DROP TABLE"]
 
         if exists_ok:
@@ -142,7 +143,7 @@ class Model(metaclass=ModelMeta):
             return await cls.pool.acquire()
 
         raise RuntimeWarning(
-            f"Unable to get Connection, either call `Model.create_pool` or provide a `con` arg."
+            "Unable to get Connection, either call `Model.create_pool` or provide a con` argument."
         )
 
     @classmethod
@@ -183,7 +184,7 @@ class Model(metaclass=ModelMeta):
 
     @classmethod
     def all_models(cls) -> List["Model"]:
-        """Returns a list of all `Model` subclasses."""
+        """Returns a list of all :class:`Model` subclasses."""
         return cls.__subclasses__()
 
     def as_dict(self, *columns) -> dict:

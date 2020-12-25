@@ -6,6 +6,8 @@ from postDB.types import SQLType, String
 
 
 class Column:
+    """Class to define a column in a :class:`Model`."""
+
     __slots__ = (
         "column_type",
         "index",
