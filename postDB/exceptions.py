@@ -4,5 +4,5 @@ class SchemaError(Exception):
 
 
 class UniqueViolationError(SchemaError):
-    """Raised when a Unique constraint is violated."""
+    """Raised when a unique constraint is violated."""
     pass
