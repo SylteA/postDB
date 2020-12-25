@@ -56,7 +56,7 @@ Types
 
 .. automodule:: postDB.types
     :members:
-    :exclude-members: SQLType, python, to_sql
+    :exclude-members: SQLType, python, to_sql, is_real_type
 
 Exceptions
 ------------
