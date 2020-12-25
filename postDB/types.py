@@ -8,18 +8,20 @@ from postDB.exceptions import SchemaError
 
 
 class SQLType:
-    """Base class for all the other types"""
+    """Base class for all the other types."""
 
     python = None
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
+        """Returns a dict of the class attributes."""
         o = self.__dict__.copy()
         cls = self.__class__
         o["__meta__"] = cls.__module__ + "." + cls.__qualname__
         return o
 
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(cls, data: dict) -> "SQLType":
+        """Create a type instance from a dict."""
         meta = data.pop("__meta__")
         given = cls.__module__ + "." + cls.__qualname__
         if given != meta:
@@ -37,11 +39,13 @@ class SQLType:
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    def to_sql(self):
-        """Return the SQL of the type"""
+    def to_sql(self) -> str:
+        """Returns the SQL of the type."""
         raise NotImplementedError()
 
-    def is_real_type(self):
+    def is_real_type(self) -> bool:
+        """Returns a bool stating if the type is a real PostgreSQL type
+        or if it has been defined as a type for ease of use"""
         return True
 
 
@@ -80,7 +84,7 @@ class DateTime(SQLType):
 
     python = datetime.datetime
 
-    def __init__(self, *, timezone=False):
+    def __init__(self, *, timezone: bool = False):
         self.timezone = timezone
 
     def to_sql(self):
@@ -115,7 +119,7 @@ class Integer(SQLType):
 
     python = int
 
-    def __init__(self, *, big=False, small=False):
+    def __init__(self, *, big: bool = False, small: bool = False):
         if big and small:
             raise SchemaError("Integer column type cannot be both big and small")
 
@@ -230,7 +234,7 @@ class String(SQLType):
 
     python = str
 
-    def __init__(self, *, length: int = None, fixed=False):
+    def __init__(self, *, length: int = None, fixed: bool = False):
         if fixed and length is None:
             raise SchemaError("Cannot have fixed string with no length")
 
@@ -255,7 +259,7 @@ class Time(SQLType):
 
     python = datetime.time
 
-    def __init__(self, *, timezone=False):
+    def __init__(self, *, timezone: bool = False):
         self.timezone = timezone
 
     def to_sql(self):
@@ -274,6 +278,8 @@ class JSON(SQLType):
 
 
 class ForeignKey(SQLType):
+    """Reference to another column in another model."""
+
     def __init__(
         self,
         model: str,
@@ -338,7 +344,7 @@ class Array(SQLType):
 
     python = list
 
-    def __init__(self, sql_type):
+    def __init__(self, sql_type: SQLType):
         if inspect.isclass(sql_type):
             sql_type = sql_type()
 

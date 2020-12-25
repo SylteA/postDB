@@ -27,6 +27,7 @@ def format_missing(missing):
 
 class Model(metaclass=ModelMeta):
     """Base class for all the models."""
+
     pool: Optional[Pool] = None
 
     def __init__(self, **attrs):
@@ -57,7 +58,7 @@ class Model(metaclass=ModelMeta):
 
     @classmethod
     def create_table_sql(cls, *, exists_ok: bool = True) -> str:
-        """Generates the CREATE TABLE statement."""
+        """Generates the ``CREATE TABLE`` SQL statement."""
         statements = []
         builder = ["CREATE TABLE"]
 
@@ -95,6 +96,7 @@ class Model(metaclass=ModelMeta):
 
     @classmethod
     def drop_table_sql(cls, exists_ok: bool = True) -> str:
+        """Generates the ``DROP TABLE`` SQL statement."""
         builder = ["DROP TABLE"]
 
         if exists_ok:
