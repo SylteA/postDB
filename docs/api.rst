@@ -62,6 +62,7 @@ Exceptions
 ------------
 
 The following exceptions are thrown by the module.
+Other exceptions might be raised by :py:mod:`asyncpg`.
 
 .. autoexception:: postDB.exceptions.SchemaError
 
