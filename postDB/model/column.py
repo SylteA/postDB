@@ -1,11 +1,13 @@
 import inspect
-
+import typing
 
 from postDB.exceptions import SchemaError
 from postDB.types import SQLType, String
 
 
 class Column:
+    """Class to define a column in a :class:`Model`."""
+
     __slots__ = (
         "column_type",
         "index",
@@ -19,14 +21,14 @@ class Column:
 
     def __init__(
         self,
-        column_type,
+        column_type: SQLType,
         *,
-        index=False,
-        primary_key=False,
-        nullable=False,
-        unique=False,
-        default=None,
-        name=None
+        index: bool = False,
+        primary_key: bool = False,
+        nullable: bool = False,
+        unique: bool = False,
+        default: typing.Optional[typing.Any] = None,
+        name: typing.Optional[str] = None
     ):
         if inspect.isclass(column_type):
             column_type = column_type()
@@ -59,7 +61,8 @@ class Column:
                 "'unique', 'primary_key', and 'default' are mutually exclusive."
             )
 
-    def generate_create_table_sql(self):
+    def generate_create_table_sql(self) -> str:
+        """Generates the SQL for this column for the ``CREATE TABLE`` statement."""
         builder = [self.name, self.column_type.to_sql()]
 
         default = self.default

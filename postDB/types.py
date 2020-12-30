@@ -8,16 +8,20 @@ from postDB.exceptions import SchemaError
 
 
 class SQLType:
+    """Base class for all the other types."""
+
     python = None
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
+        """Returns a dict of the class attributes."""
         o = self.__dict__.copy()
         cls = self.__class__
         o["__meta__"] = cls.__module__ + "." + cls.__qualname__
         return o
 
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(cls, data: dict) -> "SQLType":
+        """Create a type instance from a dict."""
         meta = data.pop("__meta__")
         given = cls.__module__ + "." + cls.__qualname__
         if given != meta:
@@ -35,14 +39,19 @@ class SQLType:
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    def to_sql(self):
+    def to_sql(self) -> str:
+        """Returns the SQL of the type."""
         raise NotImplementedError()
 
-    def is_real_type(self):
+    def is_real_type(self) -> bool:
+        """Returns a bool stating if the type is a real PostgreSQL type
+        or if it has been defined as a type for ease of use"""
         return True
 
 
 class Binary(SQLType):
+    """Type for python :class:`bytes`. ``BYTEA`` in PostgreSQL."""
+
     python = bytes
 
     def to_sql(self):
@@ -50,6 +59,8 @@ class Binary(SQLType):
 
 
 class Boolean(SQLType):
+    """Type for python :class:`bool`. ``BOOLEAN`` in PostgreSQL."""
+
     python = bool
 
     def to_sql(self):
@@ -57,6 +68,8 @@ class Boolean(SQLType):
 
 
 class Date(SQLType):
+    """Type for python :class:`datetime.date`. ``DATE`` in PostgreSQL."""
+
     python = datetime.date
 
     def to_sql(self):
@@ -64,9 +77,14 @@ class Date(SQLType):
 
 
 class DateTime(SQLType):
+    """Type for python :class:`datetime.datetime`. ``TIMESTAMP WITH TIME ZONE``
+    or ``TIMESTAMP WITHOUT TIME ZONE`` in PostgreSQL.
+
+    Optional timezone with the :attr:`timezone` attribute."""
+
     python = datetime.datetime
 
-    def __init__(self, *, timezone=False):
+    def __init__(self, *, timezone: bool = False):
         self.timezone = timezone
 
     def to_sql(self):
@@ -76,6 +94,8 @@ class DateTime(SQLType):
 
 
 class Real(SQLType):
+    """Type for python :class:`float`. ``REAL`` in PostgreSQL."""
+
     python = float
 
     def to_sql(self):
@@ -83,6 +103,8 @@ class Real(SQLType):
 
 
 class Float(SQLType):
+    """Type for python :class:`float`. ``FLOAT`` in PostgreSQL."""
+
     python = float
 
     def to_sql(self):
@@ -90,9 +112,14 @@ class Float(SQLType):
 
 
 class Integer(SQLType):
+    """Type for python :class:`int`. ``INTEGER``
+    or ``BIG INT`` or ``SMALL INT`` in PostgreSQL.
+
+    Optional big or small integer with :attr:`big` and :attr:`small`"""
+
     python = int
 
-    def __init__(self, *, big=False, small=False):
+    def __init__(self, *, big: bool = False, small: bool = False):
         if big and small:
             raise SchemaError("Integer column type cannot be both big and small")
 
@@ -107,6 +134,11 @@ class Integer(SQLType):
 
 
 class Serial(Integer):
+    """Type for python :class:`int` that autoincrements. ``SERIAL``
+    or ``BIG SERIAL`` or ``SMALL SERIAL`` in PostgreSQL.
+
+    Optional big or small integer with :attr:`big` and :attr:`small`"""
+
     def to_sql(self):
         if self.big or self.small:
             return ("BIG" if self.big else "SMALL") + "SERIAL"
@@ -118,9 +150,30 @@ class Serial(Integer):
 
 
 class Interval(SQLType):
+    """Type for python :class:`datetime.timedelta`. ``INTERVAL``
+    or ``INTERVAL {field}`` in PostgreSQL.
+
+    Optional field argument for setting the interval type with the :attr:`field`.
+    field argument needs to be in this list:
+
+    - ``"YEAR"``
+    - ``"MONTH"``
+    - ``"DAY"``
+    - ``"HOUR"``
+    - ``"MINUTE"``
+    - ``"SECOND"``
+    - ``"YEAR TO MONTH"``
+    - ``"DAY TO HOUR"``
+    - ``"DAY TO MINUTE"``
+    - ``"DAY TO SECOND"``
+    - ``"HOUR TO MINUTE"``
+    - ``"HOUR TO SECOND"``
+    - ``"MINUTE TO SECOND"``
+    """
+
     python = datetime.timedelta
 
-    def __init__(self, field=None):
+    def __init__(self, field: str = None):
         if field:
             field = field.upper()
             if field not in (
@@ -138,7 +191,7 @@ class Interval(SQLType):
                 "HOUR TO SECOND",
                 "MINUTE TO SECOND",
             ):
-                raise SchemaError("invalid interval specified")
+                raise SchemaError("Invalid interval specified")
             self.field = field
         else:
             self.field = None
@@ -150,9 +203,14 @@ class Interval(SQLType):
 
 
 class Numeric(SQLType):
+    """Type for python :class:`decimal.Decimal`. ``NUMERIC``
+    or ``NUMERIC({precision}, {scale})`` in PostgreSQL.
+
+    Optional precision and scale with :attr:`precision` and :attr:`scale`"""
+
     python = decimal.Decimal
 
-    def __init__(self, *, precision=None, scale=None):
+    def __init__(self, *, precision: int = None, scale: int = None):
         if precision is not None:
             if precision < 0 or precision > 1000:
                 raise SchemaError("precision must be greater than 0 and below 1000")
@@ -169,9 +227,14 @@ class Numeric(SQLType):
 
 
 class String(SQLType):
+    """Type for python :class:`str`. ``TEXT``
+    or ``CHAR({length})`` or ``VARCHAR({length})`` in PostgreSQL.
+
+    Optional length and fixed with :attr:`length` and :attr:`fixed`"""
+
     python = str
 
-    def __init__(self, *, length=None, fixed=False):
+    def __init__(self, *, length: int = None, fixed: bool = False):
         if fixed and length is None:
             raise SchemaError("Cannot have fixed string with no length")
 
@@ -189,9 +252,14 @@ class String(SQLType):
 
 
 class Time(SQLType):
+    """Type for python :class:`datetime.time`. ``TIME WITH TIME ZONE``
+    or ``TIME WITHOUT TIME ZONE`` in PostgreSQL.
+
+    Optional timezone with the :attr:`timezone` attribute."""
+
     python = datetime.time
 
-    def __init__(self, *, timezone=False):
+    def __init__(self, *, timezone: bool = False):
         self.timezone = timezone
 
     def to_sql(self):
@@ -201,6 +269,8 @@ class Time(SQLType):
 
 
 class JSON(SQLType):
+    """Type for python :class:`dict`. ``JSON`` in PostgreSQL."""
+
     python = dict
 
     def to_sql(self):
@@ -208,6 +278,8 @@ class JSON(SQLType):
 
 
 class ForeignKey(SQLType):
+    """Reference to another column in another model."""
+
     def __init__(
         self,
         model: str,
@@ -268,9 +340,11 @@ class ForeignKey(SQLType):
 
 
 class Array(SQLType):
+    """Type for python :class:`list`. ``{type} ARRAY`` in PostgreSQL."""
+
     python = list
 
-    def __init__(self, sql_type):
+    def __init__(self, sql_type: SQLType):
         if inspect.isclass(sql_type):
             sql_type = sql_type()
 

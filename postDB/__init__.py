@@ -14,7 +14,7 @@ VersionInfo = namedtuple("VersionInfo", "major minor micro releaselevel serial")
 
 
 def get_version(version: tuple):
-    """Return a cleaned up version number from VERSION."""
+    """Return a cleaned up version number from :data:`VERSION`."""
     return "%s %s.%s.%s" % (version[3], version[0], version[1], version[2])
 
 
