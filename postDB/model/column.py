@@ -1,8 +1,8 @@
-import inspect
-import typing
-
 from postDB.exceptions import SchemaError
 from postDB.types import SQLType, String
+
+import inspect
+import typing
 
 
 class Column:
@@ -21,7 +21,7 @@ class Column:
 
     def __init__(
         self,
-        column_type: SQLType,
+        column_type: typing.Union[typing.Type[SQLType], SQLType],
         *,
         index: bool = False,
         primary_key: bool = False,

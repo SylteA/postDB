@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union, Type
 import datetime
 import inspect
 import decimal
@@ -285,7 +285,7 @@ class ForeignKey(SQLType):
         model: str,
         column: str,
         *,
-        sql_type: Optional[SQLType] = None,
+        sql_type: Optional[Union[Type[SQLType], SQLType]] = None,
         on_delete: str = "CASCADE",
         on_update: str = "NO ACTION"
     ):
@@ -344,7 +344,7 @@ class Array(SQLType):
 
     python = list
 
-    def __init__(self, sql_type: SQLType):
+    def __init__(self, sql_type: Union[Type[SQLType], SQLType]):
         if inspect.isclass(sql_type):
             sql_type = sql_type()
 

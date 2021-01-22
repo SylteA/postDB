@@ -31,7 +31,9 @@ author = "Sylte"
 
 release = ""
 with open("../postDB/__init__.py") as f:
-    release = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
+    release = re.search(
+        r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE
+    ).group(1)
 
 # The short X.Y version.
 version = ".".join(release.split(".")[:2])
@@ -48,7 +50,7 @@ needs_sphinx = "3.0"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.coverage",
-    'sphinx.ext.extlinks',
+    "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
 ]

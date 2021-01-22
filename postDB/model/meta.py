@@ -1,5 +1,7 @@
 from postDB import Column
 
+from typing import List
+
 
 class ModelMeta(type):
     """Metaclass for Model class."""
@@ -12,7 +14,7 @@ class ModelMeta(type):
 
         tablename = kwargs.get("tablename", name.lower() + "s")
 
-        columns = []
+        columns: List[Column] = []
         for key, col in data.items():
             if isinstance(col, Column):
                 if col.name is None:

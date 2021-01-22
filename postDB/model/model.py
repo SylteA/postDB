@@ -1,9 +1,9 @@
-import json
-from asyncio import BaseEventLoop
 from typing import Optional, List
+from asyncio import BaseEventLoop
+import json
 
-from asyncpg import create_pool
 from asyncpg.connection import Connection
+from asyncpg import create_pool
 from asyncpg.pool import Pool
 
 from postDB.model.meta import ModelMeta
@@ -95,14 +95,15 @@ class Model(metaclass=ModelMeta):
         return "\n".join(statements)
 
     @classmethod
-    def drop_table_sql(cls, exists_ok: bool = True) -> str:
+    def drop_table_sql(cls, *, exists_ok: bool = True, cascade: bool = False) -> str:
         """Generates the ``DROP TABLE`` SQL statement."""
         builder = ["DROP TABLE"]
 
         if exists_ok:
             builder.append("IF EXISTS")
 
-        builder.append("%s CASCADE;" % cls.__tablename__)
+        to_cascade = "CASCADE" if cascade else "RESTRICT"
+        builder.append("%s %s;" % (cls.__tablename__, to_cascade))
         return " ".join(builder)
 
     @classmethod
@@ -145,7 +146,7 @@ class Model(metaclass=ModelMeta):
             return await cls.pool.acquire()
 
         raise RuntimeWarning(
-            "Unable to get Connection, either call `Model.create_pool` or provide a con` argument."
+            "Unable to get Connection, either call `Model.create_pool` or provide a `con` argument."
         )
 
     @classmethod
@@ -172,12 +173,13 @@ class Model(metaclass=ModelMeta):
         con: Optional[Connection] = None,
         *,
         verbose: bool = False,
+        cascade: bool = True,
         exists_ok: bool = True,
     ):
         """Drop the PostgreSQL Table for this Model."""
         con = await cls.ensure_con(con=con)
 
-        sql = cls.drop_table_sql(exists_ok=exists_ok)
+        sql = cls.drop_table_sql(exists_ok=exists_ok, cascade=cascade)
 
         if verbose:
             print(sql)

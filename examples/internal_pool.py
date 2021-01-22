@@ -54,7 +54,7 @@ async def main():
     print(await Model.pool.fetch("SELECT * FROM users"))
 
     try:
-        await asyncio.wait_for(Model.pool.close(), timeout=3.0)
+        await asyncio.wait_for(Model.pool.close(), timeout=10.0)
     except asyncio.TimeoutError:
         print("Exiting by timeout...")
 
