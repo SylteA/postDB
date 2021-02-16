@@ -1,9 +1,9 @@
-from typing import Optional, List
-from asyncio import BaseEventLoop
 import json
+from asyncio import BaseEventLoop
+from typing import Optional, List, Type
 
-from asyncpg.connection import Connection
 from asyncpg import create_pool
+from asyncpg.connection import Connection
 from asyncpg.pool import Pool
 
 from postDB.model.meta import ModelMeta
@@ -138,56 +138,44 @@ class Model(metaclass=ModelMeta):
         )
 
     @classmethod
-    async def ensure_con(cls, con: Optional[Connection] = None) -> Connection:
-        if isinstance(con, Connection):
-            return con
-
-        if isinstance(cls.pool, Pool):
-            return await cls.pool.acquire()
-
-        raise RuntimeWarning(
-            "Unable to get Connection, either call `Model.create_pool` or provide a `con` argument."
-        )
-
-    @classmethod
     async def create_table(
         cls,
-        con: Optional[Connection] = None,
         *,
         verbose: bool = False,
         exists_ok: bool = True,
     ):
         """Create the PostgreSQL Table for this Model."""
-        con = await cls.ensure_con(con=con)
+        if cls.pool is None:
+            raise TypeError("Unable to get Connection, please call `Model.create_pool` before using the coroutine.")
 
         sql = cls.create_table_sql(exists_ok=exists_ok)
 
         if verbose:
             print(sql)
 
-        return await con.execute(sql)
+        return cls.pool.execute(sql)
 
     @classmethod
     async def drop_table(
         cls,
-        con: Optional[Connection] = None,
         *,
         verbose: bool = False,
         cascade: bool = True,
         exists_ok: bool = True,
     ):
         """Drop the PostgreSQL Table for this Model."""
-        con = await cls.ensure_con(con=con)
+        if cls.pool is None:
+            raise TypeError("Unable to get Connection, please call `Model.create_pool` before using the coroutine.")
 
         sql = cls.drop_table_sql(exists_ok=exists_ok, cascade=cascade)
 
         if verbose:
             print(sql)
 
-        return await con.execute(sql)
+        return cls.pool.execute(sql)
 
     @classmethod
-    def all_models(cls) -> List["Model"]:
+    def all_models(cls) -> List[Type["Model"]]:
         """Returns a list of all :class:`Model` subclasses."""
         return cls.__subclasses__()
 
