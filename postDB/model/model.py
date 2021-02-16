@@ -153,7 +153,7 @@ class Model(metaclass=ModelMeta):
         if verbose:
             print(sql)
 
-        return cls.pool.execute(sql)
+        return await cls.pool.execute(sql)
 
     @classmethod
     async def drop_table(
@@ -172,7 +172,7 @@ class Model(metaclass=ModelMeta):
         if verbose:
             print(sql)
 
-        return cls.pool.execute(sql)
+        return await cls.pool.execute(sql)
 
     @classmethod
     def all_models(cls) -> List[Type["Model"]]:
