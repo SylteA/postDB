@@ -1,8 +1,9 @@
 from postDB.exceptions import SchemaError
 from postDB.types import SQLType, String
+from postDB.model.index import Index
 
+from typing import Optional, Union, Type, Any
 import inspect
-import typing
 
 
 class Column:
@@ -15,20 +16,20 @@ class Column:
         "nullable",
         "default",
         "unique",
+        "model",
         "name",
-        "index_name",
     )
 
     def __init__(
         self,
-        column_type: typing.Union[typing.Type[SQLType], SQLType],
+        column_type: Union[Type[SQLType], SQLType],
         *,
-        index: bool = False,
+        index: Optional[Union[Index, bool]] = None,
+        default: Optional[Any] = None,
+        name: Optional[str] = None,
         primary_key: bool = False,
         nullable: bool = False,
-        unique: bool = False,
-        default: typing.Optional[typing.Any] = None,
-        name: typing.Optional[str] = None
+        unique: bool = False
     ):
         if inspect.isclass(column_type):
             column_type = column_type()
@@ -47,6 +48,12 @@ class Column:
                             "Column default cannot be of different type than column_type"
                         )
 
+        if index and not isinstance(index, Index):
+            index = Index()
+
+        if isinstance(index, Index):
+            index.column = self
+
         self.column_type = column_type
         self.index = index
         self.unique = unique
@@ -54,7 +61,8 @@ class Column:
         self.nullable = nullable
         self.default = default
         self.name = name
-        self.index_name = None  # to be filled later
+
+        self.model = None  # set later.
 
         if sum(map(bool, (unique, primary_key, default is not None))) > 1:
             raise SchemaError(

@@ -20,14 +20,17 @@ class ModelMeta(type):
                 if col.name is None:
                     col.name = key
 
-                if col.index:
-                    col.index_name = "%s_%s_idx" % (tablename, col.name)
-
                 columns.append(col)
 
         data["columns"] = columns
         data["__tablename__"] = tablename
-        return super().__new__(mcs, name, parents, data)
+
+        model = super().__new__(mcs, name, parents, data)
+
+        for col in columns:
+            col.model = model
+
+        return model
 
     @property
     def __tablename__(self):

@@ -6,7 +6,7 @@ from postDB import Model, Column, types
 
 
 class User(Model):
-    id = Column(types.Integer(big=True), primary_key=True)
+    id = Column(types.Integer, primary_key=True)
     username = Column(types.String)
     email = Column(types.String, unique=True)
 

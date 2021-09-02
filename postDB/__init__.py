@@ -9,6 +9,8 @@ from collections import namedtuple
 
 from postDB.model.column import Column
 from postDB.model.model import Model
+from postDB.model.index import Index
+
 
 VersionInfo = namedtuple("VersionInfo", "major minor micro releaselevel serial")
 
@@ -22,3 +24,6 @@ VERSION = (0, 2, 3, "final", 0)
 version_info = VersionInfo(*VERSION)
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
+
+
+__all__ = (Column, Model, Index)

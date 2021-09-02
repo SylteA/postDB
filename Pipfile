@@ -5,6 +5,8 @@ verify_ssl = true
 
 [dev-packages]
 black = "*"
+flake8 = "*"
+pre-commit = "*"
 
 [packages]
 asyncpg = "*"
@@ -14,3 +16,7 @@ python_version = "3.8"
 
 [pipenv]
 allow_prereleases = true
+
+[scripts]
+test = "python -m pytest"
+lint = "pre-commit run --all-files"
