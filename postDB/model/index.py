@@ -35,6 +35,7 @@ class Index:
 
     @property
     def name(self) -> str:
+        """Default name impl."""
         if self.__name is None:
             default = "%s_%s_idx" % (self.column.model.__tablename__, self.column.name)
             self.name = default
@@ -46,6 +47,7 @@ class Index:
         self.__name = value
 
     def generate_create_table_sql(self) -> str:
+        """Generates the SQL for this index."""
         builder = ["CREATE"]
 
         if self.unique:
@@ -59,9 +61,8 @@ class Index:
                 self.column.model.__tablename__,
                 "USING",
                 self.method,
-                f"({self.column.name})",
-                self.order,
+                f"({self.column.name} {self.order})",
             ]
         )
 
-        return " ".join(builder)
+        return " ".join(builder) + ";"
