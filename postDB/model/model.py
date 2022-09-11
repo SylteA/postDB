@@ -35,7 +35,7 @@ class Model(metaclass=ModelMeta):
 
         for col in self.columns:
             try:
-                val = attrs[col.name]
+                column_name = attrs[col.name]
             except KeyError:
                 if (
                     col.default is None
@@ -45,9 +45,9 @@ class Model(metaclass=ModelMeta):
                     missing.append(col)
                     continue
 
-                val = col.default
+                column_name = col.default
 
-            setattr(self, col.name, val)
+            setattr(self, col.name, column_name)
 
         if missing:
             raise TypeError(
@@ -87,9 +87,7 @@ class Model(metaclass=ModelMeta):
 
         for col in cls.columns:
             if col.index:
-                fmt = "CREATE INDEX IF NOT EXISTS {1.index_name} ON {0} ({1.name});".format(
-                    cls.__tablename__, col
-                )
+                fmt = col.index.generate_create_table_sql()
                 statements.append(fmt)
 
         return "\n".join(statements)
@@ -146,7 +144,9 @@ class Model(metaclass=ModelMeta):
     ):
         """Create the PostgreSQL Table for this Model."""
         if cls.pool is None:
-            raise TypeError("Unable to get Connection, please call `Model.create_pool` before using the coroutine.")
+            raise TypeError(
+                "Unable to get Connection, please call `Model.create_pool` before using the coroutine."
+            )
 
         sql = cls.create_table_sql(exists_ok=exists_ok)
 
@@ -165,7 +165,9 @@ class Model(metaclass=ModelMeta):
     ):
         """Drop the PostgreSQL Table for this Model."""
         if cls.pool is None:
-            raise TypeError("Unable to get Connection, please call `Model.create_pool` before using the coroutine.")
+            raise TypeError(
+                "Unable to get Connection, please call `Model.create_pool` before using the coroutine."
+            )
 
         sql = cls.drop_table_sql(exists_ok=exists_ok, cascade=cascade)
 
